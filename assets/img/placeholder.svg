@@ -1,0 +1,9 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="400" height="400" viewBox="0 0 400 400">
+  <rect width="400" height="400" fill="#e3f2ff"/>
+  <g fill="none" stroke="#9cc6ea" stroke-width="10" stroke-linecap="round" stroke-linejoin="round">
+    <rect x="120" y="120" width="160" height="130" rx="16" fill="#f2f8ff"/>
+    <path d="M120 210l45-40 40 34 35-30 40 36"/>
+  </g>
+  <circle cx="170" cy="160" r="14" fill="#9cc6ea"/>
+  <text x="200" y="300" font-family="Nunito,Arial" font-size="26" fill="#7ba7cf" text-anchor="middle" font-weight="700">Chipi Frozen Food</text>
+</svg>

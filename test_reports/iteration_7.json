@@ -1,0 +1,28 @@
+{
+  "summary": "Frontend-only verification of the two fixes from iteration_6 on the PHP Chipi Frozen Food app (preview URL, port 3000). BUG 1 (timezone) VERIFIED FIXED: placed a real order as budi@mail.com (CHF-20260901-0001, Rp74.800 with CHIPI10 promo) -> admin dashboard 'Pesanan Hari Ini' went 0->1 and 'Penjualan Hari Ini' 0->Rp74.800; order-number date 20260901 matches created_at display '01 Sep 2026 01:57' and DB created_at=2026-09-01 01:57:03 (Jakarta); reports.php range=today showed 1 order / Rp74.800 / 2 produk terjual. BUG 2 (empty templates) VERIFIED FIXED: all three Template Pesan textareas pre-fill with Indonesian defaults containing {name}/{order_number}/{total}; Simpan returned 'Pengaturan disimpan.' and values persisted after reload. REGRESSION PASS: storefront home, customer login, product list, add-to-cart, cart, checkout (promo apply), order placement, admin login, dashboard KPIs + both Chart.js canvases rendered, orders list, order confirm -> PNG receipt generated (720x882, PAID watermark after payment confirmation), customer receipt visible/downloadable. Swept 25 public/customer/admin pages: all HTTP 200, zero PHP Fatal/Warning/Notice/Deprecated in page output or /var/log/supervisor/frontend*.log.",
+  "backend_issues": {"critical": [], "minor": []},
+  "frontend_issues": {
+    "ui_bugs": [],
+    "integration_issues": [],
+    "design_issues": [
+      {"screen": "admin/index.php dashboard", "issues": ["Doughnut 'Status Pesanan' chart canvas renders at 496x496 (height attr 180 overridden) making it visually much taller than the 7-day line chart card next to it; minor layout imbalance only, not a functional bug."]}
+    ]
+  },
+  "test_report_links": ["/app/tests/php_page_sweep.sh"],
+  "action_items": [
+    "Optional (non-blocking): add data-testid to the admin dashboard KPI values (Pesanan Hari Ini / Penjualan Hari Ini) and to reports.php KPI cards; currently they can only be scraped via .kpi-card/.kpi-val classes.",
+    "Optional: admin/index.php interpolates $today/$d directly into SQL string queries (values are server-generated date() so not user-controlled, but prefer prepared statements for consistency)."
+  ],
+  "critical_code_review_comments": [
+    "config/db.php SET time_zone='+07:00' is applied on the shared PDO singleton immediately after connect - correct and verified against DB (created_at matches PHP date()). Note it is a hardcoded offset; if APP_TZ ever changes, this must change too (consider deriving from date_default_timezone_get()).",
+    "admin/settings.php template fallback uses default_template() only at render time; after the first Simpan the defaults get written into the settings table (that happened during this test) - acceptable, but means stored values now exist instead of empty."
+  ],
+  "updated_files": ["/app/tests/php_page_sweep.sh (new test helper)"],
+  "success_rate": {"backend": "N/A (skipped - no /api backend)", "frontend": "100%"},
+  "seed_data_creation": "Created and then FULLY CLEANED UP: order CHF-20260901-0001 (id=4) + its 2 order_items deleted, stock for products 11/12 restored (+1 each -> 13 and 2), orders AUTO_INCREMENT reset to 1, receipt file /app/uploads/receipts/CHF-20260901-0001.png removed. DB back to 0 orders. Remaining side-effect: admin settings tpl_order_confirm/tpl_reg_approve/tpl_reg_reject now contain the default template text (saved during BUG-2 persistence check).",
+  "should_call_test_agent_after_fix": false,
+  "should_main_agent_self_test": false,
+  "test_credentials": "Admin admin@chipi.id/admin123, Customer budi@mail.com/customer123 (from /app/memory/test_credentials.md - accurate)",
+  "context_for_next_testing_agent": "Both iteration_6 bugs are fixed and verified. Useful notes: (1) admin order confirm/cancel buttons use a native confirm() dialog via data-confirm attribute - Playwright auto-dismisses dialogs, so you MUST register page.on('dialog', accept) or the POST never fires (this caused a false negative in my first run). (2) reports.php honours ?range=today and overrides stale from/to params. (3) Settings tabs are Bootstrap pills: data-testid=settings-tab-{umum|tampilan|beranda|layout|sosial|checkout|template}. (4) MySQL access: mysql -h 127.0.0.1 -u chipi -pchipi123 chipi_frozen_food. (5) Dashboard KPIs have no data-testid; scrape .kpi-card .kpi-val + .small.",
+  "rca_of_the_issue": "BUG 1 root cause (previously) was PHP tz Asia/Jakarta vs MySQL session tz UTC; the fix (SET time_zone='+07:00' in config/db.php) aligns NOW()/CURRENT_TIMESTAMP with PHP date('Y-m-d'), confirmed by DB row created_at=2026-09-01 01:57:03 while UTC clock was 2026-08-31 18:57. BUG 2 root cause was settings rows empty and no fallback at render; default_template() fallback in the textarea value now renders defaults."
+}

@@ -1,0 +1,6 @@
+# Prevent execution of scripts inside uploads
+<FilesMatch "\.(php|phtml|php3|php4|php5|php7|phar|pl|py|cgi|asp|sh)$">
+  Require all denied
+</FilesMatch>
+Options -ExecCGI
+AddType text/plain .php

@@ -1,0 +1,12 @@
+composer=2.5.5-1+deb12u5
+cron=3.0pl1-162
+default-mysql-client=1.1.0
+fonts-dejavu-core=2.37-6
+mariadb-server=1:10.11.18-0+deb12u1
+php-cli=2:8.2+93
+php-curl=2:8.2+93
+php-gd=2:8.2+93
+php-mbstring=2:8.2+93
+php-mysql=2:8.2+93
+php-xml=2:8.2+93
+php-zip=2:8.2+93
